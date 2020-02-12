@@ -30,7 +30,7 @@ function start() {
       name: "userAdd",
       type: "list",
       message: "What would you like to do?",
-      choices: ["ADD ROLE", "ADD DEPARTMENT", "ADD EMPLOYEE", "VIEW ROLE", "VIEW DEPARTMENT", "VIEW EMPLOYEE"]
+      choices: ["ADD ROLE", "ADD DEPARTMENT", "ADD EMPLOYEE", "VIEW ROLE", "VIEW DEPARTMENT", "VIEW EMPLOYEE","UPDATE EMPLOYEE"]
     })
     .then(function (answer) {
       // based on their answer, either call the bid or the post functions
@@ -50,6 +50,9 @@ function start() {
 
       } else if (answer.userAdd === "VIEW DEPARTMENT") {
         viewDepartment();
+      }
+      else if (answer.userAdd === "UPDATE EMPLOYEE") {
+        updateEmployeeRolePrompt();
       }
     });
 }
@@ -229,7 +232,7 @@ function viewEmployee() {
     if (err) throw err;
     // once you have the items, prompt the user for which they'd like to bid on
     for (var i = 0; i < results.length; i++) {
-      console.log(results[i].first_name + " | " + results[i].last_name + " | " + results[i].manager_id + " | "  + results[i].id);
+      console.log(results[i].first_name + " | " + results[i].last_name + " | " + results[i].manager_id + " | "  + results[i].id + " | " + results[i].role_id);
     }
     console.log("-----------------------------------");
     start();
@@ -263,4 +266,47 @@ function viewDepartment() {
     start();
 
   });
+};
+
+
+
+
+function updateEmployeeRolePrompt() {
+  // prompt for info about the item being put up for auction
+  inquirer
+    .prompt([
+      {
+        name: "employeeId",
+        type: "input",
+        message: "What is the employee ID?"
+      },
+      {
+        name: "roleId",
+        type: "input",
+        message: "What is the employees new role ID?",
+
+        validate: function (value) {
+          if (isNaN(value) === false) {
+            return true;
+          }
+          return false;
+        }
+      }
+    ])
+    .then(function(answer) {
+      // when finished prompting, insert a new item into the db with that info
+      console.log(answer.roleId)
+      console.log(answer.employeeId)
+      connection.query(
+        "UPDATE employee SET role_id= " + answer.roleId + " WHERE id = " + answer.employeeId,
+        function(error) {
+          if (error) throw err;
+          console.log("Employee role updated successfully!");
+          start();
+        }
+      );
+    });
 }
+
+
+
